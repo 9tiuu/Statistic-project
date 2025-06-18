@@ -42,8 +42,8 @@ const FormData = () => {
     const [regressionResults, setRegressionResults] = useState([]);
     const [valueA, setValueA] = useState(null);
     const [valueB, setValueB] = useState(null);
-    const [valueN, setValueN] = useState(null);
-    const [interpret, setInterpret] = useState('');
+    // const [valueN, setValueN] = useState(null);
+    // const [interpret, setInterpret] = useState('');
     const [linealModel, setLinealModel] = useState(null);
 
     const FormDataPrevent = (event) => {
@@ -89,7 +89,7 @@ const FormData = () => {
 
             setValueA(intercepto);
             setValueB(pendiente);
-            setValueN(coeficiente);
+            // setValueN(coeficiente);
 
             setRegressionResults([
                 { label: 'Pendiente (B)', value: pendiente },
@@ -427,7 +427,7 @@ const FormData = () => {
                                                 <input type='number' onChange={(e) => setLinealModel((valueB * e.target.value) + valueA)} className=' w-full p-2 text-sm text-gray-900 border border-gray-400 rounded focus:outline-none' placeholder={`${xVar}`} />
                                             </div>
 
-                                            <div className={`w-full mt-4 ${linealModel == valueA ? 'hidden' : 'flex'}`}>
+                                            <div className={`w-full mt-4 ${linealModel ? 'hidden' : 'flex'}`}>
                                                 <p><b className='font-semibold'>{yVar} esperados:</b> {linealModel}</p>
                                             </div>
                                         </div>
