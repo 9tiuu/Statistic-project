@@ -17,10 +17,7 @@ const Navbar = () => {
                             <a href='/' className="block transition hover:transition py-2 px-3 md:p-0 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-red-50 md:dark:hover:text-red-500">Inicio</a>
                         </li>
                         <li>
-                            <a href='/info' className="block transition hover:transition py-2 px-3 md:p-0 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-red-50 md:dark:hover:text-red-500">Problemática</a>
-                        </li>
-                        <li>
-                            <a href='https://github.com/9tiuu/MathSystem' className="block transition hover:transition py-2 px-3 md:p-0 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-red-50 md:dark:hover:text-red-500">GitHub</a>
+                            <a href='https://github.com/9tiuu/Statistic-project' target="_blank" className="block transition hover:transition py-2 px-3 md:p-0 text-gray-900 rounded-sm hover:bg-gray-100 md:hover:bg-transparent md:hover:text-red-50 md:dark:hover:text-red-500">GitHub</a>
                         </li>
                     </ul>
                 </div>

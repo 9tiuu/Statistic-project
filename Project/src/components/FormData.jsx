@@ -2,13 +2,32 @@ import { useState } from 'react';
 import imagen from '../img/fondoinacap.png';
 import logo from '../img/inacap-logo.png';
 import * as ss from 'simple-statistics';
-import { number } from 'mathjs';
+
+import {
+    Chart as ChartJS,
+    LinearScale,
+    PointElement,
+    LineElement,
+    Tooltip,
+    Legend,
+    Title,
+
+    CategoryScale,
+    BarElement,
+
+} from 'chart.js';
+
+import { Scatter } from 'react-chartjs-2';
+import { Bar } from 'react-chartjs-2';
+
+ChartJS.register(LinearScale, PointElement, LineElement, Tooltip, Legend, Title);
+ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const FormData = () => {
     const [alert, setAlert] = useState('');
     const [loading, setLoading] = useState(false);
     const [activateModal, setActivateModal] = useState(false);
-    const [recommend, setRecommend] = useState(true);
+    const [recommend, setRecommend] = useState(false);
 
     const [xTable, setXTable] = useState([]);
     const [yTable, setYTable] = useState([]);   
@@ -16,9 +35,15 @@ const FormData = () => {
     const [xInput, setXInput] = useState('');
     const [yInput, setYInput] = useState('');
 
+    const [nVar, setNVar] = useState('');
+    const [xVar, setXVar] = useState('');
+    const [yVar, setYVar] = useState('');
+
     const [regressionResults, setRegressionResults] = useState([]);
     const [valueA, setValueA] = useState(null);
     const [valueB, setValueB] = useState(null);
+    const [valueN, setValueN] = useState(null);
+    const [interpret, setInterpret] = useState('');
     const [linealModel, setLinealModel] = useState(null);
 
     const FormDataPrevent = (event) => {
@@ -51,7 +76,7 @@ const FormData = () => {
             setYTable(yList);
 
             const regression = ss.linearRegression(xList.map((x, i) => [x, yList[i]]));
-            const linear = ss.linearRegressionLine(regression);
+            // const linear = ss.linearRegressionLine(regression);
 
             const pendiente = Number(regression.m.toFixed(3));
             const intercepto = Number(regression.b.toFixed(3));
@@ -64,6 +89,7 @@ const FormData = () => {
 
             setValueA(intercepto);
             setValueB(pendiente);
+            setValueN(coeficiente);
 
             setRegressionResults([
                 { label: 'Pendiente (B)', value: pendiente },
@@ -92,6 +118,147 @@ const FormData = () => {
 
     const CloseModal = () => {
         setActivateModal(!activateModal);
+    };
+
+    // Preparar datos para scatter (puntos)
+    const scatterData = xTable.map((x, i) => ({ x, y: yTable[i] }));
+
+    // Limites para la linea de regresion
+    const xMin = xTable.length ? Math.min(...xTable) : 0;
+    const xMax = xTable.length ? Math.max(...xTable) : 0;
+
+    // Puntos para la linea de regresion
+    const regressionLine = (valueA !== null && valueB !== null && xTable.length)
+    ? [
+        { x: xMin, y: valueB * xMin + valueA },
+        { x: xMax, y: valueB * xMax + valueA }
+        ]
+    : [];
+
+    // Datos para Chart.js
+    const data = {
+        datasets: [
+            {
+                label: 'Datos',
+                data: scatterData,
+                backgroundColor: 'rgba(54, 162, 235, 1)',
+                pointRadius: 6,
+                type: 'scatter'
+            },
+            {
+                label: 'Regresión Lineal',
+                data: regressionLine,
+                type: 'line',
+                borderColor: 'rgba(255, 99, 132, 1)',
+                borderWidth: 2,
+                fill: false,
+                pointRadius: 0,
+                tension: 0
+            }
+        ]
+    };
+
+    // Opciones para el gráfico
+    const options = {
+        responsive: true,
+        scales: {
+            x: { type: 'linear', position: 'bottom', title: { display: true, text: xVar } },
+            y: { title: { display: true, text: yVar } }
+        },
+        plugins: {
+            legend: { position: 'top' },
+            title: { display: true, text: 'Gráfico de Dispersión con Regresión Lineal' }
+        },
+        animation: {
+            duration: 3000, 
+            easing: 'easeOutQuart' 
+        },
+    };
+
+    const barData1 = {
+        labels: xTable.map((_, i) => `n${i + 1}`), // etiquetas: N1, N2, N3, ...
+        datasets: [
+            {
+                label: xVar,
+                data: xTable, // valores en el eje Y
+                backgroundColor: 'rgba(54, 102, 235, 0.65)',
+                borderWidth: 0,
+                borderRadius: 2
+            }
+        ]
+    };
+
+    const barOptions1 = {
+        responsive: true,
+        animation: {
+            duration: 3000,
+            easing: 'easeOutCubic'
+        },
+        plugins: {
+            legend: { display: true },
+            title: {
+                display: true,
+                text: `${xVar} por ${nVar}`
+            }
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: nVar
+                }
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: xVar
+                },
+                beginAtZero: true
+            }
+        }
+    };
+
+    const barData2 = {
+        labels: yTable.map((_, i) => `n${i + 1}`), // etiquetas: N1, N2, N3, ...
+        datasets: [
+            {
+                label: yVar,
+                data: yTable, // valores en el eje Y
+                backgroundColor: 'rgba(99, 174, 255, 0.65)',
+                borderWidth: 0,
+                borderRadius: 2
+            }
+        ]
+    };
+
+    const barOptions2 = {
+        responsive: true,
+        animation: {
+            duration: 3000,
+            easing: 'easeOutCubic'
+        },
+        plugins: {
+            legend: { display: true },
+            title: {
+                display: true,
+                text: `${yVar} por ${nVar}`
+            }
+        },
+        scales: {
+            x: {
+                title: {
+                    display: true,
+                    text: nVar
+                }
+            },
+            y: {
+                title: {
+                    display: true,
+                    text: yVar
+                },
+                beginAtZero: true
+            }
+        }
     };
 
     return (
@@ -157,7 +324,9 @@ const FormData = () => {
                                             </button>
                                         </div>
                                         <div class="mt-2 mb-4 text-sm">
-                                            
+                                            <input onChange={(e) => setNVar(e.target.value)} className='w-full p-2 mb-2 text-sm text-gray-900 border border-gray-300 rounded focus:outline-none' placeholder='N' />
+                                            <input onChange={(e) => setXVar(e.target.value)} className='w-full p-2 mb-2 text-sm text-gray-900 border border-gray-300 rounded focus:outline-none' placeholder='Variable (x)' />
+                                            <input onChange={(e) => setYVar(e.target.value)} className='w-full p-2 text-sm text-gray-900 border border-gray-300 rounded focus:outline-none' placeholder='Variable (y)' />
                                         </div>
                                         <div className="flex">
                                             <button onClick={CloseModal} type="button" className="text-white bg-blue-800 cursor-pointer transition hover:transition hover:bg-blue-900 focus:ring-4 focus:outline-none focus:ring-blue-200 font-medium rounded text-sm px-3 py-1.5 me-2 text-center inline-flex items-center">
@@ -188,7 +357,7 @@ const FormData = () => {
                 activateModal && (
                     <div className="w-full h-screen z-40 absolute bg-black/40 backdrop-blur-xs flex items-center justify-center p-2">
                         <div className='bg-white p-7 rounded-lg md:w-10/12 h-10/12 w-full  animate-[bajar_0.8s_ease-out_forwards]'>
-                            <div className="flex items-center text-blue-800 mb-4">
+                            <div className="flex items-center text-blue-600 mb-4">
                                 <svg className="shrink-0 w-4 h-4 me-2" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="currentColor" viewBox="0 0 20 20">
                                     <path d="M10 .5a9.5 9.5 0 1 0 9.5 9.5A9.51 9.51 0 0 0 10 .5ZM9.5 4a1.5 1.5 0 1 1 0 3 1.5 1.5 0 0 1 0-3ZM12 15H8a1 1 0 0 1 0-2h1v-3H8a1 1 0 0 1 0-2h2a1 1 0 0 1 1 1v4h1a1 1 0 0 1 0 2Z"/>
                                 </svg>
@@ -203,57 +372,99 @@ const FormData = () => {
                                 </button>
                             </div>
                             {/* <div className="mt-2 mb-4 text-sm overflow-y-auto h-[40rem]"> */}
-                            <div className="mt-2 mb-4 bg-white overflow-y-auto h-96 flex md:flex-row flex-col items-center justify-center">
+                            <div className="mt-2 mb-4 bg-white h-11/12 flex md:flex-row flex-col justify-center">
 
-                                    <div className="w-full h-full p-4 bg-white">
+                                    <div className="w-full h-full border-y p-4 overflow-y-auto">
                                         <h2 className='text-lg font-bold mb-2 uppercase'>Tabla de datos</h2>
-                                        <div className="relative overflow-x-auto mb-4">
-                                            <table className="w-full text-sm text-left rtl:text-right text-gray-700">
-                                                <thead>
-                                                    {/* <tr class="bg-white border-b">
-                                                        <th scope="col" class="px-6 py-3" className="border border-gray-400 bg-gray-100 px-4 py-2 text-left">{'Requerimientos'} (X)</th>
-                                                    </tr> */}
-                                                </thead>
-                                                <tbody>
-                                                    <tr class="bg-white border-b">
-                                                        <td scope="col" class="px-6 py-3" className="border font-bold border-gray-400 px-4 py-2">{'Requerimientos'} (X)</td>
-                                                        {
-                                                            xTable.map((x) => (
-                                                                <td scope="col" class="px-6 py-3" className="border text-blue-600 border-gray-400 px-4 py-2">{x}</td>
-                                                            ))
-                                                        }
-                                                    </tr>
-                                                    <tr  class="bg-white">
-                                                        <td scope="col" class="px-6 py-3" className="border font-bold border-gray-400 px-4 py-2">{'Ingresos'}(Y)</td>
-                                                        {
-                                                            yTable.map((y) => (
-                                                                <td scope="col" class="px-6 py-3" className="border text-blue-600 border-gray-400 px-4 py-2">{y}</td>
-                                                            ))
-                                                        }
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
+                                        <div className="bg-gray-100 rounded p-4 mb-2 h-full">
+                                            <div className="relative overflow-x-auto mb-4">
+                                                <table className="w-full text-sm text-left rtl:text-right text-gray-700">
+                                                    <thead>
+                                                        {<tr class="bg-white border-b">
+                                                            <th scope="col" class="px-6 py-3" className="border border-gray-400 bg-blue-50 px-4 py-2 text-left">{nVar} (N)</th>
+                                                            {
+                                                                xTable.map((item, index) => (
+                                                                    <td id={item} key={index} class="px-6 py-3" className="border bg-blue-50 border-gray-400 px-4 py-2">{index + 1}</td>
+                                                                )) 
+                                                            }
+                                                        </tr>}
+                                                    </thead>
+                                                    <tbody>
+                                                        <tr class="bg-white border-b">
+                                                            <td class="px-6 py-3" className="border font-bold border-gray-400 px-4 py-2">{xVar} (X)</td>
+                                                            {
+                                                                xTable.map((x) => (
+                                                                    <td class="px-6 py-3" className="border text-blue-600 border-gray-400 px-4 py-2">{x}</td>
+                                                                ))
+                                                            }
+                                                        </tr>
+                                                        <tr  class="bg-white">
+                                                            <td class="px-6 py-3" className="border font-bold border-gray-400 px-4 py-2">{yVar} (Y)</td>
+                                                            {
+                                                                yTable.map((y) => (
+                                                                    <td class="px-6 py-3" className="border text-blue-600 border-gray-400 px-4 py-2">{y}</td>
+                                                                ))
+                                                            }
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
 
-                                        <h2 className='text-lg font-bold mb-2 uppercase'>Resultados</h2>
-                                        {
-                                            regressionResults.map((item, index) => (
-                                                <li key={index} className="mb-1">
-                                                    <span className="font-semibold">{item.label}:</span> {item.value.toFixed(4)}
-                                                </li>
-                                            ))
-                                        }
-                                        <li className="mb-1">
-                                            <span className="font-semibold">Modelo lineal: </span>y = {valueB}(x) + {valueA}
-                                        </li>
+                                            <h2 className='text-lg font-bold mb-2 uppercase'>Resultados</h2>
+                                            {
+                                                regressionResults.map((item, index) => (
+                                                    <li key={index} className="mb-1">
+                                                        <span className="font-semibold">{item.label}:</span> {item.value.toFixed(4)}
+                                                    </li>
+                                                ))
+                                            }
+                                            <li className="mb-1">
+                                                <span className="font-semibold">Modelo lineal simple: </span>y = {valueB}x + {valueA}
+                                            </li>
 
-                                        <div className="">
-                                            y = {valueB}(<input className='w-8 p-1 text-sm text-gray-900 border border-gray-300 rounded focus:outline-none' placeholder='x'></input>) + {valueA} = {}
+                                            <div className="mt-4 w-96">
+                                                <label for="y" className="block mb-2 font-semibold text-gray-900 text-base font-bold"><b className='text-blue-600 font-semibold'>Estimar {yVar}</b> en funcion de {xVar} <b className='text-red-600'>*</b></label>
+                                                <input type='number' onChange={(e) => setLinealModel((valueB * e.target.value) + valueA)} className=' w-full p-2 text-sm text-gray-900 border border-gray-400 rounded focus:outline-none' placeholder={`${xVar}`} />
+                                            </div>
+
+                                            <div className={`w-full mt-4 ${linealModel == valueA ? 'hidden' : 'flex'}`}>
+                                                <p><b className='font-semibold'>{yVar} esperados:</b> {linealModel}</p>
+                                            </div>
                                         </div>
                                     </div>
 
-                                    <div className="w-full h-full p-4">
-                                        
+                                    <div className="w-full h-full border-y p-4 bg-white overflow-y-auto">
+                                        {/* w-full h-full border p-4 bg-white overflow-y-auto */}
+                                        <h2 className='text-lg font-bold uppercase'>Graficos</h2>
+
+                                        <div className="mt-2 rounded p-2 bg-gray-100">
+                                            {
+                                                scatterData.length > 0 && regressionLine.length > 0 && (
+                                                    <Scatter data={data} options={options} />
+                                                )
+                                            }
+                                        </div>
+
+                                        <div className="mt-2 rounded p-2 bg-gray-100">                                        
+                                            {
+                                                yTable.length > 0 && (
+                                                    <div style={{ maxWidth: '600px', margin: 'auto'}}>
+                                                        <Bar data={barData1} options={barOptions1} />
+                                                    </div>
+                                                )
+                                            }
+                                        </div>
+
+                                        <div className="mt-2 rounded p-2 bg-gray-100">                                        
+                                            {
+                                                yTable.length > 0 && (
+                                                    <div style={{ maxWidth: '600px', margin: 'auto'}}>
+                                                        <Bar data={barData2} options={barOptions2} />
+                                                    </div>
+                                                )
+                                            }
+                                        </div>
+
                                     </div>
                             </div>
                         </div>
