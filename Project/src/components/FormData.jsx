@@ -441,7 +441,7 @@ const FormData = () => {
                                                 <input type='number' onChange={(e) => setLinealModel((valueB * e.target.value) + valueA)} className=' w-full p-2 text-sm text-gray-900 border border-gray-400 rounded focus:outline-none' placeholder={`${xVar}`} />
                                             </div>
 
-                                            <div className={`w-full mt-4 ${linealModel ? 'hidden' : 'flex'}`}>
+                                            <div className={`w-full mt-4`}>
                                                 <p><b className='font-semibold'>{yVar} esperados:</b> {linealModel}</p>
                                             </div>
                                         </div>
