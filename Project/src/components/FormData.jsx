@@ -11,6 +11,7 @@ import {
     Tooltip,
     Legend,
     Title,
+    LineController,
 
     CategoryScale,
     BarElement,
@@ -20,8 +21,21 @@ import {
 import { Scatter } from 'react-chartjs-2';
 import { Bar } from 'react-chartjs-2';
 
-ChartJS.register(LinearScale, PointElement, LineElement, Tooltip, Legend, Title);
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+ChartJS.register(
+    LinearScale, 
+    PointElement, 
+    LineElement, 
+    Tooltip, 
+    Legend, 
+    Title, 
+    LineController, 
+    CategoryScale, 
+    LinearScale, 
+    BarElement, 
+    Title, 
+    Tooltip, 
+    Legend
+);
 
 const FormData = () => {
     const [alert, setAlert] = useState('');
